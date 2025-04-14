@@ -10,12 +10,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { Check, Clock, Cloud, CloudOff, Mail, Send, Shield, Smartphone, User } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import UserSettings from '@/components/Settings/UserSettings';
+import { useAuth } from '@/contexts/AuthContext';
 
 const SettingsPage = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [formValues, setFormValues] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
+    name: user?.name || 'John Doe',
+    email: user?.email || 'john.doe@example.com',
     notifications: true,
     darkMode: false,
     dataBackup: true,
@@ -52,12 +55,17 @@ const SettingsPage = () => {
         <p className="text-muted-foreground">Configure your farming system</p>
       </div>
       
-      <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 lg:w-[400px] mb-6">
+      <Tabs defaultValue="user" className="w-full">
+        <TabsList className="grid w-full grid-cols-4 lg:w-[500px] mb-6">
+          <TabsTrigger value="user">User</TabsTrigger>
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="system">System</TabsTrigger>
           <TabsTrigger value="account">Account</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="user" className="space-y-6">
+          <UserSettings />
+        </TabsContent>
         
         <TabsContent value="general" className="space-y-6">
           <Card>
