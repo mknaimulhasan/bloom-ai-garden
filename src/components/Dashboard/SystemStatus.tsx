@@ -51,7 +51,7 @@ const SystemStatus = () => {
             </div>
             <span className="text-sm font-medium">87%</span>
           </div>
-          <Progress value={87} className="h-1.5 bg-muted" indicatorClassName="bg-farm-green-500" />
+          <Progress value={87} className="h-1.5 bg-muted" />
         </div>
       </CardContent>
     </Card>

@@ -1,12 +1,10 @@
-
 import { useState } from 'react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Area, AreaChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { DropletIcon, SunIcon, ThermometerIcon, ToxicIcon } from 'lucide-react';
+import { DropletIcon, SunIcon, ThermometerIcon, GlassWater } from 'lucide-react';
 
-// Mock sensor data
 const temperatureData = [
   { time: '00:00', value: 22.3 },
   { time: '02:00', value: 21.8 },
@@ -71,7 +69,7 @@ const formatData = {
   temperature: { color: '#f97316', unit: '°C', name: 'Temperature', icon: ThermometerIcon },
   humidity: { color: '#0284c7', unit: '%', name: 'Humidity', icon: DropletIcon },
   light: { color: '#eab308', unit: 'lux', name: 'Light', icon: SunIcon },
-  co2: { color: '#6b7280', unit: 'ppm', name: 'CO₂', icon: ToxicIcon },
+  co2: { color: '#6b7280', unit: 'ppm', name: 'CO₂', icon: GlassWater },
 };
 
 const SensorPage = () => {

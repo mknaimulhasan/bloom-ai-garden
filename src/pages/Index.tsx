@@ -6,7 +6,7 @@ import SystemStatus from '@/components/Dashboard/SystemStatus';
 import PlantPreview from '@/components/Dashboard/PlantPreview';
 import ActivityFeed from '@/components/Dashboard/ActivityFeed';
 import GrowthChart from '@/components/Dashboard/GrowthChart';
-import { Plant } from 'lucide-react';
+import { LeafyGreen } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -18,7 +18,7 @@ const Index = () => {
         </div>
         <Card className="bg-farm-green-100 border-farm-green-300">
           <CardContent className="p-3 flex gap-2 items-center">
-            <Plant className="h-5 w-5 text-farm-green-600" />
+            <LeafyGreen className="h-5 w-5 text-farm-green-600" />
             <span className="font-medium text-farm-green-700">Growing Season: Summer</span>
           </CardContent>
         </Card>

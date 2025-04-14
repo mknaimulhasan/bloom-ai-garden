@@ -1,5 +1,5 @@
 
-import { DropletIcon, SunIcon, ThermometerIcon, ToxicIcon } from 'lucide-react';
+import { DropletIcon, SunIcon, ThermometerIcon, GlassWater } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -60,7 +60,7 @@ const SensorReadings = () => {
         status="warning"
       />
       <SensorCard
-        icon={ToxicIcon}
+        icon={GlassWater}
         title="CO₂ Level"
         value="620"
         unit="ppm"
