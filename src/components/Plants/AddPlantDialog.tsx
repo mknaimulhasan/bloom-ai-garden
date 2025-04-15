@@ -1,10 +1,12 @@
+
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export interface PlantType {
   id: number;
@@ -31,105 +33,120 @@ interface AddPlantDialogProps {
 
 const AddPlantDialog = ({ open, onOpenChange, onAddPlant }: AddPlantDialogProps) => {
   const { toast } = useToast();
-  const [name, setName] = useState('');
-  const [variety, setVariety] = useState('');
-  const [status, setStatus] = useState<'healthy' | 'attention' | 'unhealthy'>('healthy');
-  const [nextAction, setNextAction] = useState('');
-  const [temperature, setTemperature] = useState('');
-  const [humidity, setHumidity] = useState('');
-  const [light, setLight] = useState('');
-  const [watering, setWatering] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    variety: '',
+    status: 'healthy' as const,
+    planted: new Date().toISOString().split('T')[0],
+    optimalTemp: '',
+    optimalHumidity: '',
+    optimalLight: '',
+    optimalWater: '',
+    nextAction: '',
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (value: string, field: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !variety) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    const today = new Date().toISOString().split('T')[0];
+    // Calculate days growing
+    const plantedDate = new Date(formData.planted);
+    const today = new Date();
+    const daysGrowing = Math.floor((today.getTime() - plantedDate.getTime()) / (1000 * 60 * 60 * 24));
     
     const newPlant: Omit<PlantType, 'id'> = {
-      name,
-      variety,
-      status,
-      planted: today,
-      daysGrowing: 0,
-      nextAction: nextAction || 'Monitor growth',
+      name: formData.name,
+      variety: formData.variety,
+      status: formData.status,
+      planted: formData.planted,
+      daysGrowing,
+      nextAction: formData.nextAction,
       optimalConditions: {
-        temperature: temperature || '20-25°C',
-        humidity: humidity || '60-70%',
-        light: light || '12-16 hours',
-        watering: watering || 'Regular',
+        temperature: formData.optimalTemp,
+        humidity: formData.optimalHumidity,
+        light: formData.optimalLight,
+        watering: formData.optimalWater,
       },
-      image: `https://placehold.co/250x250/E1F5E6/3C9F56?text=${encodeURIComponent(name)}`
+      image: `https://placehold.co/250x250/E1F5E6/3C9F56?text=${encodeURIComponent(formData.name)}`,
     };
     
     onAddPlant(newPlant);
-    resetForm();
+    
+    // Reset form
+    setFormData({
+      name: '',
+      variety: '',
+      status: 'healthy',
+      planted: new Date().toISOString().split('T')[0],
+      optimalTemp: '',
+      optimalHumidity: '',
+      optimalLight: '',
+      optimalWater: '',
+      nextAction: '',
+    });
+    
     onOpenChange(false);
     
     toast({
       title: "Plant Added",
-      description: `${name} has been added to your plants.`,
+      description: `${formData.name} has been added to your collection.`,
     });
-  };
-  
-  const resetForm = () => {
-    setName('');
-    setVariety('');
-    setStatus('healthy');
-    setNextAction('');
-    setTemperature('');
-    setHumidity('');
-    setLight('');
-    setWatering('');
   };
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Add New Plant</DialogTitle>
-            <DialogDescription>
-              Fill in the details to add a new plant to your collection.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
+      <DialogContent className="sm:max-w-[525px]">
+        <DialogHeader>
+          <DialogTitle>Add New Plant</DialogTitle>
+          <DialogDescription>
+            Enter the details of your new plant to add it to your collection.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="font-medium">Plant Name*</Label>
+              <Label htmlFor="name">Plant Name</Label>
               <Input 
                 id="name" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                placeholder="e.g., Basil" 
-                required 
+                name="name" 
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="e.g., Basil"
+                required
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="variety" className="font-medium">Variety*</Label>
+              <Label htmlFor="variety">Variety</Label>
               <Input 
                 id="variety" 
-                value={variety} 
-                onChange={(e) => setVariety(e.target.value)} 
-                placeholder="e.g., Sweet Genovese" 
-                required 
+                name="variety" 
+                value={formData.variety}
+                onChange={handleChange}
+                placeholder="e.g., Sweet Genovese"
+                required
               />
             </div>
-            
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="status" className="font-medium">Status</Label>
-              <Select value={status} onValueChange={(value) => setStatus(value as 'healthy' | 'attention' | 'unhealthy')}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a status" />
+              <Label htmlFor="status">Health Status</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleSelectChange(value, 'status')}
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="healthy">Healthy</SelectItem>
@@ -140,62 +157,85 @@ const AddPlantDialog = ({ open, onOpenChange, onAddPlant }: AddPlantDialogProps)
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="nextAction" className="font-medium">Next Action</Label>
+              <Label htmlFor="planted">Date Planted</Label>
               <Input 
-                id="nextAction" 
-                value={nextAction} 
-                onChange={(e) => setNextAction(e.target.value)} 
-                placeholder="e.g., Water in 2 days" 
+                id="planted" 
+                name="planted" 
+                type="date" 
+                value={formData.planted}
+                onChange={handleChange}
+                required
               />
             </div>
-            
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="nextAction">Next Action</Label>
+            <Input 
+              id="nextAction" 
+              name="nextAction" 
+              value={formData.nextAction}
+              onChange={handleChange}
+              placeholder="e.g., Harvest in 1 week"
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Optimal Growing Conditions</Label>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="temperature" className="font-medium">Temperature</Label>
+                <Label htmlFor="optimalTemp" className="text-xs">Temperature</Label>
                 <Input 
-                  id="temperature" 
-                  value={temperature} 
-                  onChange={(e) => setTemperature(e.target.value)} 
-                  placeholder="e.g., 20-25°C" 
+                  id="optimalTemp" 
+                  name="optimalTemp" 
+                  value={formData.optimalTemp}
+                  onChange={handleChange}
+                  placeholder="e.g., 20-25°C"
+                  required
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="humidity" className="font-medium">Humidity</Label>
+                <Label htmlFor="optimalHumidity" className="text-xs">Humidity</Label>
                 <Input 
-                  id="humidity" 
-                  value={humidity} 
-                  onChange={(e) => setHumidity(e.target.value)} 
-                  placeholder="e.g., 60-70%" 
+                  id="optimalHumidity" 
+                  name="optimalHumidity" 
+                  value={formData.optimalHumidity}
+                  onChange={handleChange}
+                  placeholder="e.g., 60-70%"
+                  required
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="light" className="font-medium">Light</Label>
+                <Label htmlFor="optimalLight" className="text-xs">Light</Label>
                 <Input 
-                  id="light" 
-                  value={light} 
-                  onChange={(e) => setLight(e.target.value)} 
-                  placeholder="e.g., 12-16 hours" 
+                  id="optimalLight" 
+                  name="optimalLight" 
+                  value={formData.optimalLight}
+                  onChange={handleChange}
+                  placeholder="e.g., 12-16 hours"
+                  required
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="watering" className="font-medium">Watering</Label>
+                <Label htmlFor="optimalWater" className="text-xs">Watering</Label>
                 <Input 
-                  id="watering" 
-                  value={watering} 
-                  onChange={(e) => setWatering(e.target.value)} 
-                  placeholder="e.g., Regular" 
+                  id="optimalWater" 
+                  name="optimalWater" 
+                  value={formData.optimalWater}
+                  onChange={handleChange}
+                  placeholder="e.g., Regular"
+                  required
                 />
               </div>
             </div>
           </div>
           
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="submit">Add Plant</Button>
           </DialogFooter>
         </form>

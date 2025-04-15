@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import DashboardLayout from '@/components/Layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,8 +9,8 @@ import { Clock, Edit, Leaf, Plus, Search, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import AddPlantDialog, { PlantType } from '@/components/Plants/AddPlantDialog';
 
-// Mock plant data
-const initialPlantsData = [
+// Mock plant data with correct status types
+const initialPlantsData: PlantType[] = [
   {
     id: 1,
     name: 'Basil',
@@ -107,7 +106,6 @@ const PlantsPage = () => {
   });
   
   const handleAddPlant = (newPlant: Omit<PlantType, 'id'>) => {
-    // Generate a new ID (in a real app, this would come from the backend)
     const newId = Math.max(0, ...plantsData.map(p => p.id)) + 1;
     setPlantsData([...plantsData, { id: newId, ...newPlant }]);
   };
