@@ -8,9 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Clock, Edit, Leaf, Plus, Search, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import AddPlantDialog, { PlantType } from '@/components/Plants/AddPlantDialog';
 
 // Mock plant data
-const plantsData = [
+const initialPlantsData = [
   {
     id: 1,
     name: 'Basil',
@@ -93,16 +94,32 @@ const PlantsPage = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPlant, setSelectedPlant] = useState<number | null>(null);
+  const [addPlantOpen, setAddPlantOpen] = useState(false);
+  const [plantsData, setPlantsData] = useState<PlantType[]>(initialPlantsData);
+  const [activeTab, setActiveTab] = useState('all');
   
-  const filteredPlants = plantsData.filter(plant => 
-    plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    plant.variety.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPlants = plantsData.filter(plant => {
+    const matchesSearch = plant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      plant.variety.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (activeTab === 'all') return matchesSearch;
+    return matchesSearch && plant.status === activeTab;
+  });
   
-  const addNewPlant = () => {
+  const handleAddPlant = (newPlant: Omit<PlantType, 'id'>) => {
+    // Generate a new ID (in a real app, this would come from the backend)
+    const newId = Math.max(0, ...plantsData.map(p => p.id)) + 1;
+    setPlantsData([...plantsData, { id: newId, ...newPlant }]);
+  };
+  
+  const handleDeletePlant = (id: number) => {
+    setPlantsData(plantsData.filter(plant => plant.id !== id));
+    if (selectedPlant === id) {
+      setSelectedPlant(null);
+    }
     toast({
-      title: "Feature Coming Soon",
-      description: "Plant addition will be available in the next update",
+      title: "Plant Removed",
+      description: "The plant has been removed from your collection.",
     });
   };
   
@@ -113,7 +130,7 @@ const PlantsPage = () => {
           <h1 className="text-3xl font-bold mb-1">Plants Management</h1>
           <p className="text-muted-foreground">Monitor and manage your plants</p>
         </div>
-        <Button onClick={addNewPlant}>
+        <Button onClick={() => setAddPlantOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           Add Plant
         </Button>
@@ -132,7 +149,7 @@ const PlantsPage = () => {
               />
             </div>
             
-            <Tabs defaultValue="all" className="w-[300px]">
+            <Tabs defaultValue="all" className="w-[300px]" value={activeTab} onValueChange={setActiveTab}>
               <TabsList>
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="healthy">Healthy</TabsTrigger>
@@ -142,44 +159,56 @@ const PlantsPage = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredPlants.map((plant) => (
-              <Card 
-                key={plant.id} 
-                className={`cursor-pointer transition-all duration-200 hover:shadow-md ${selectedPlant === plant.id ? 'ring-2 ring-primary' : ''}`}
-                onClick={() => setSelectedPlant(plant.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex gap-4">
-                    <div className="h-16 w-16 rounded-md overflow-hidden shrink-0">
-                      <img 
-                        src={plant.image} 
-                        alt={plant.name} 
-                        className="h-full w-full object-cover" 
-                      />
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium">{plant.name}</h3>
-                          <p className="text-sm text-muted-foreground">{plant.variety}</p>
+            {filteredPlants.length > 0 ? (
+              filteredPlants.map((plant) => (
+                <Card 
+                  key={plant.id} 
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${selectedPlant === plant.id ? 'ring-2 ring-primary' : ''}`}
+                  onClick={() => setSelectedPlant(plant.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      <div className="h-16 w-16 rounded-md overflow-hidden shrink-0">
+                        <img 
+                          src={plant.image} 
+                          alt={plant.name} 
+                          className="h-full w-full object-cover" 
+                        />
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium">{plant.name}</h3>
+                            <p className="text-sm text-muted-foreground">{plant.variety}</p>
+                          </div>
+                          <Badge className={statusColors[plant.status as keyof typeof statusColors]}>
+                            {statusText[plant.status as keyof typeof statusText]}
+                          </Badge>
                         </div>
-                        <Badge className={statusColors[plant.status as keyof typeof statusColors]}>
-                          {statusText[plant.status as keyof typeof statusText]}
-                        </Badge>
+                        
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          <span>{plant.daysGrowing} days growing</span>
+                        </div>
+                        
+                        <p className="text-sm">{plant.nextAction}</p>
                       </div>
-                      
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        <span>{plant.daysGrowing} days growing</span>
-                      </div>
-                      
-                      <p className="text-sm">{plant.nextAction}</p>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-2 flex flex-col items-center justify-center py-12 text-center">
+                <Leaf className="h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium">No plants found</h3>
+                <p className="text-muted-foreground mt-1">Try adjusting your search or add a new plant</p>
+                <Button variant="outline" className="mt-4" onClick={() => setAddPlantOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Plant
+                </Button>
+              </div>
+            )}
           </div>
         </div>
         
@@ -199,7 +228,14 @@ const PlantsPage = () => {
                           <Button variant="ghost" size="icon">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeletePlant(plant.id);
+                            }}
+                          >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>
@@ -274,6 +310,12 @@ const PlantsPage = () => {
           )}
         </div>
       </div>
+      
+      <AddPlantDialog 
+        open={addPlantOpen} 
+        onOpenChange={setAddPlantOpen} 
+        onAddPlant={handleAddPlant} 
+      />
     </DashboardLayout>
   );
 };
