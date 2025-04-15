@@ -17,6 +17,9 @@ import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+import AIInsights from "./pages/AIInsights";
+import Monitoring from "./pages/Monitoring";
+import YieldMetrics from "./pages/YieldMetrics";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +42,9 @@ const App = () => (
                 <Route path="/plants" element={<Plants />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/ai-insights" element={<AIInsights />} />
+                <Route path="/monitoring" element={<Monitoring />} />
+                <Route path="/yield" element={<YieldMetrics />} />
               </Route>
               
               <Route path="*" element={<NotFound />} />

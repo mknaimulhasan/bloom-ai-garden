@@ -1,6 +1,6 @@
 
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart3, Home, Leaf, Settings, Thermometer, Droplets, Lightbulb, Info, LogOut } from 'lucide-react';
+import { AreaChart, BarChart3, Brain, Droplets, Home, Info, Leaf, LightbulbIcon, LogOut, Microscope, Settings, Thermometer } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -11,13 +11,18 @@ const Sidebar = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
   
-  const menuItems = [
+  const mainMenuItems = [
     { name: 'Dashboard', icon: Home, path: '/' },
     { name: 'Sensors', icon: Thermometer, path: '/sensors' },
     { name: 'Controls', icon: Droplets, path: '/controls' },
     { name: 'Plants', icon: Leaf, path: '/plants' },
     { name: 'Analytics', icon: BarChart3, path: '/analytics' },
-    { name: 'Settings', icon: Settings, path: '/settings' },
+  ];
+  
+  const advancedMenuItems = [
+    { name: 'AI Insights', icon: Brain, path: '/ai-insights', badge: 'New' },
+    { name: 'Monitoring', icon: Microscope, path: '/monitoring', badge: 'Beta' },
+    { name: 'Yield Metrics', icon: AreaChart, path: '/yield' },
   ];
 
   const getInitials = (name: string) => {
@@ -31,7 +36,7 @@ const Sidebar = () => {
   return (
     <div className="hidden md:flex h-full w-64 flex-col bg-sidebar px-3 py-4">
       <div className="flex items-center gap-3 px-2 py-4">
-        <Lightbulb className="h-8 w-8 text-farm-green-100" />
+        <LightbulbIcon className="h-8 w-8 text-farm-green-100" />
         <span className="text-xl font-display text-white">Bloom.AI</span>
       </div>
       
@@ -55,7 +60,10 @@ const Sidebar = () => {
       )}
       
       <nav className="mt-8 flex flex-col gap-1">
-        {menuItems.map((item) => (
+        <div className="px-3 py-2 text-xs uppercase text-sidebar-foreground/70">
+          Main
+        </div>
+        {mainMenuItems.map((item) => (
           <Link
             key={item.name}
             to={item.path}
@@ -66,6 +74,30 @@ const Sidebar = () => {
           >
             <item.icon className="h-5 w-5" />
             <span>{item.name}</span>
+          </Link>
+        ))}
+        
+        <div className="mt-6 px-3 py-2 text-xs uppercase text-sidebar-foreground/70 flex items-center justify-between">
+          <span>Advanced Features</span>
+          <Badge variant="outline" className="bg-farm-green-600/30 text-farm-green-100 text-xs">New</Badge>
+        </div>
+        
+        {advancedMenuItems.map((item) => (
+          <Link
+            key={item.name}
+            to={item.path}
+            className={cn(
+              "flex items-center gap-3 rounded-md px-3 py-2 text-sidebar-foreground transition-colors",
+              location.pathname === item.path ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/50"
+            )}
+          >
+            <item.icon className="h-5 w-5" />
+            <span>{item.name}</span>
+            {item.badge && (
+              <Badge className="ml-auto bg-farm-green-600/30 text-farm-green-100 text-[10px]">
+                {item.badge}
+              </Badge>
+            )}
           </Link>
         ))}
       </nav>
