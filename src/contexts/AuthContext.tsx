@@ -1,6 +1,7 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/contexts/ThemeContext';
 
 type User = {
   id: string;
@@ -48,18 +49,27 @@ const hashPassword = (password: string): string => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
+  const { setTheme } = useTheme();
   
   // Check for saved session on mount
   useEffect(() => {
     const savedUser = localStorage.getItem('bloomai_user');
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        
+        // Set theme based on user preference
+        if (parsedUser.preferences.darkMode) {
+          setTheme('dark');
+        } else {
+          setTheme('light');
+        }
       } catch (error) {
         localStorage.removeItem('bloomai_user');
       }
     }
-  }, []);
+  }, [setTheme]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -75,6 +85,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         // Set user
         setUser(mockUser);
+        
+        // Set theme based on user preference
+        if (mockUser.preferences.darkMode) {
+          setTheme('dark');
+        } else {
+          setTheme('light');
+        }
         
         // Save to localStorage for persistence (in a real app, would use httpOnly cookies)
         localStorage.setItem('bloomai_user', JSON.stringify(mockUser));
@@ -121,6 +138,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Set user
         setUser(newUser);
         
+        // Set theme based on user preference (default is light)
+        setTheme('light');
+        
         // Save to localStorage for persistence
         localStorage.setItem('bloomai_user', JSON.stringify(newUser));
         
@@ -162,6 +182,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Update state
       setUser(updatedUser);
+      
+      // Update theme if darkMode preference changed
+      if (preferences.darkMode !== undefined) {
+        setTheme(preferences.darkMode ? 'dark' : 'light');
+      }
       
       // Save to localStorage
       localStorage.setItem('bloomai_user', JSON.stringify(updatedUser));

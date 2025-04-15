@@ -1,25 +1,44 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Label } from '@/components/ui/label';
-import { Bell, Moon, Laptop, Sun } from 'lucide-react';
+import { Bell, Moon, Sun } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const UserSettings = () => {
   const { user, updateUserPreferences } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const { toast } = useToast();
   
   const [notifications, setNotifications] = useState(user?.preferences.notifications || false);
-  const [darkMode, setDarkMode] = useState(user?.preferences.darkMode || false);
+  const [darkMode, setDarkMode] = useState(theme === 'dark');
   const [units, setUnits] = useState<'metric' | 'imperial'>(user?.preferences.measurementUnits || 'metric');
+  
+  // Sync dark mode with theme context
+  useEffect(() => {
+    setDarkMode(theme === 'dark');
+  }, [theme]);
+  
+  const handleDarkModeChange = (checked: boolean) => {
+    setDarkMode(checked);
+    toggleTheme();
+  };
   
   const handleSaveSettings = () => {
     updateUserPreferences({
       notifications,
       darkMode,
       measurementUnits: units,
+    });
+    
+    toast({
+      title: "Settings Saved",
+      description: "Your preferences have been updated successfully",
     });
   };
   
@@ -62,7 +81,7 @@ const UserSettings = () => {
           </div>
           <Switch 
             checked={darkMode}
-            onCheckedChange={setDarkMode}
+            onCheckedChange={handleDarkModeChange}
           />
         </div>
         

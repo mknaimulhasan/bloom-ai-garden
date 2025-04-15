@@ -1,8 +1,9 @@
 
-import { BellIcon, MenuIcon, Shield } from 'lucide-react';
+import { BellIcon, MenuIcon, Shield, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import UserProfile from '@/components/User/UserProfile';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,10 @@ import { Badge } from '@/components/ui/badge';
 const TopBar = () => {
   const { toast } = useToast();
   const { isAuthenticated, logout, user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  
+  const isDark = theme === 'dark';
   
   const showNotification = () => {
     toast({
@@ -54,8 +58,22 @@ const TopBar = () => {
                 <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-farm-green-500" />
               </Button>
               
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={toggleTheme}
+                title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {isDark ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+              
               {user?.role === 'admin' && (
-                <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
+                <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-200 dark:border-amber-800/50">
                   <Shield className="h-3 w-3 mr-1" />
                   Admin
                 </Badge>
