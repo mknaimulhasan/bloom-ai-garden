@@ -1,14 +1,15 @@
 
-import { BellIcon, MenuIcon } from 'lucide-react';
+import { BellIcon, MenuIcon, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import UserProfile from '@/components/User/UserProfile';
 import { useNavigate } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 
 const TopBar = () => {
   const { toast } = useToast();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const navigate = useNavigate();
   
   const showNotification = () => {
@@ -20,6 +21,10 @@ const TopBar = () => {
   
   const handleLogin = () => {
     navigate('/login');
+  };
+  
+  const handleSignup = () => {
+    navigate('/signup');
   };
   
   const handleLogout = () => {
@@ -42,11 +47,19 @@ const TopBar = () => {
                 variant="ghost" 
                 size="icon"
                 onClick={showNotification}
+                className="relative"
               >
                 <BellIcon className="h-5 w-5" />
                 <span className="sr-only">Notifications</span>
                 <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-farm-green-500" />
               </Button>
+              
+              {user?.role === 'admin' && (
+                <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Admin
+                </Badge>
+              )}
               
               <UserProfile />
               
@@ -55,9 +68,14 @@ const TopBar = () => {
               </Button>
             </>
           ) : (
-            <Button size="sm" onClick={handleLogin}>
-              Login
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleLogin}>
+                Login
+              </Button>
+              <Button size="sm" onClick={handleSignup}>
+                Sign Up
+              </Button>
+            </div>
           )}
         </div>
       </div>

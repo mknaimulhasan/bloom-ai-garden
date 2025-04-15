@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,7 +72,14 @@ const LoginPage = () => {
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="password">Password</Label>
+                    <Button variant="link" className="p-0 h-auto text-xs" onClick={() => {
+                      alert("Password recovery feature will be available soon");
+                    }}>
+                      Forgot password?
+                    </Button>
+                  </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -99,6 +106,12 @@ const LoginPage = () => {
             >
               Use Demo Credentials
             </Button>
+            <div className="mt-4 text-center text-sm">
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-farm-green-600 hover:underline">
+                Sign up
+              </Link>
+            </div>
             <p className="mt-4 text-center text-sm text-muted-foreground">
               By signing in, you agree to our Terms of Service and Privacy Policy.
             </p>

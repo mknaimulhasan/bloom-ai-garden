@@ -13,13 +13,13 @@ const UserSettings = () => {
   
   const [notifications, setNotifications] = useState(user?.preferences.notifications || false);
   const [darkMode, setDarkMode] = useState(user?.preferences.darkMode || false);
-  const [units, setUnits] = useState(user?.preferences.measurementUnits || 'metric');
+  const [units, setUnits] = useState<'metric' | 'imperial'>(user?.preferences.measurementUnits || 'metric');
   
   const handleSaveSettings = () => {
     updateUserPreferences({
       notifications,
       darkMode,
-      measurementUnits: units as 'metric' | 'imperial',
+      measurementUnits: units,
     });
   };
   
@@ -70,7 +70,7 @@ const UserSettings = () => {
           <Label htmlFor="units">Measurement Units</Label>
           <Select 
             value={units}
-            onValueChange={setUnits}
+            onValueChange={(value: 'metric' | 'imperial') => setUnits(value)}
           >
             <SelectTrigger id="units">
               <SelectValue placeholder="Select units" />

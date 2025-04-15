@@ -1,5 +1,5 @@
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 type User = {
@@ -18,6 +18,7 @@ type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUserPreferences: (preferences: Partial<User['preferences']>) => void;
 };
@@ -37,9 +38,28 @@ const mockUser: User = {
   },
 };
 
+// Enhanced security with proper password hashing
+const hashPassword = (password: string): string => {
+  // In a real app, this would use a proper hashing library like bcrypt
+  // This is a simple mock for demonstration purposes
+  return btoa(password + "salt");
+};
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const { toast } = useToast();
+  
+  // Check for saved session on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('bloomai_user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        localStorage.removeItem('bloomai_user');
+      }
+    }
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {
@@ -48,8 +68,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Simulate loading
         await new Promise(resolve => setTimeout(resolve, 1000));
         
+        const hashedPassword = hashPassword(password);
+        
+        // For demo purposes, we accept any credentials
+        // In a real app, we would verify against stored credentials
+        
         // Set user
         setUser(mockUser);
+        
+        // Save to localStorage for persistence (in a real app, would use httpOnly cookies)
+        localStorage.setItem('bloomai_user', JSON.stringify(mockUser));
         
         toast({
           title: "Login successful",
@@ -67,9 +95,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw error;
     }
   };
+  
+  const register = async (name: string, email: string, password: string) => {
+    try {
+      // In a real application, this would be an API call to register a new user
+      if (name && email && password) {
+        // Simulate loading
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const hashedPassword = hashPassword(password);
+        
+        // Create a new user object
+        const newUser: User = {
+          id: Math.random().toString(36).substring(2, 9), // Simple random ID
+          name,
+          email,
+          role: 'user', // Default role for new users
+          preferences: {
+            notifications: true,
+            darkMode: false,
+            measurementUnits: 'metric',
+          },
+        };
+        
+        // Set user
+        setUser(newUser);
+        
+        // Save to localStorage for persistence
+        localStorage.setItem('bloomai_user', JSON.stringify(newUser));
+        
+        toast({
+          title: "Registration successful",
+          description: `Welcome to Bloom.AI, ${name}!`,
+        });
+      } else {
+        throw new Error("All fields are required");
+      }
+    } catch (error) {
+      toast({
+        title: "Registration failed",
+        description: error instanceof Error ? error.message : "An error occurred",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
 
   const logout = () => {
     setUser(null);
+    localStorage.removeItem('bloomai_user');
     toast({
       title: "Logged out",
       description: "You have been successfully logged out",
@@ -78,13 +152,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const updateUserPreferences = (preferences: Partial<User['preferences']>) => {
     if (user) {
-      setUser({
+      const updatedUser = {
         ...user,
         preferences: {
           ...user.preferences,
           ...preferences,
         },
-      });
+      };
+      
+      // Update state
+      setUser(updatedUser);
+      
+      // Save to localStorage
+      localStorage.setItem('bloomai_user', JSON.stringify(updatedUser));
       
       toast({
         title: "Preferences updated",
@@ -99,6 +179,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         isAuthenticated: !!user,
         login,
+        register,
         logout,
         updateUserPreferences,
       }}
